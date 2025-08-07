@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { WidgetComponent } from './widget.component';
+import { WidgetComponent } from './weather-widget/components/widget.component';
 
 @Component({
   selector: 'app-root',

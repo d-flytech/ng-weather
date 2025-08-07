@@ -10,4 +10,4 @@ import { CommonModule } from '@angular/common';
 })
 export class WidgetComponent {
   days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-}
+};
