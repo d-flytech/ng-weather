@@ -1,0 +1,31 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap:20px;
+    padding: 30px;
+    max-width: 1200px;
+    margin-top: 80px;
+    margin-left: auto;
+    overflow-x: auto;
+    margin-right: auto;
+}
+
+.weather-box {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 5px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  aspect-ratio: 1 / 1;
+}
