@@ -7,4 +7,6 @@ import { WidgetComponent } from './weather-widget/components/widget.component';
   imports: [WidgetComponent],
   template: `<app-widget></app-widget>`
 })
-export class AppComponent {}
+
+export class AppComponent {
+}

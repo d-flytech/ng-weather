@@ -1,10 +1,16 @@
-  <div class = "grid-container">
-  <div class = "weather-box" *ngFor = "let day of days">
-    <h3>{{day}}</h3>
-    <p>Max: --</p>
-    <p>Min: --</p>
-  </div>
+<div class="grid-container">
+  @for (day of (days$ | async); track day.date) {
+    <div class="weather-box">
+      <h3>{{ day.date }}</h3>
+      <img [src]="getIconPath(day.code)" class = "weather-icon" alt = "weather icon"/>
+      <p>Max: {{ day.max }}°C</p>
+      <p>Min: {{ day.min }}°C</p>
+      <p>Code: {{ day.code }}</p>
+    </div>
+  }
 </div>
+
+
 
 
 
