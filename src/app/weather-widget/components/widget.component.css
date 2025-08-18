@@ -12,13 +12,42 @@ body {
   background-color: #f0f0f0;
 }
 
+h1 {
+  color: rgb(89, 134, 192);
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  margin-top: 20px;
+}
+
+h3 {
+  color: #0695c9;
+}
+
+select {
+  background-color: #e6f0fa;
+  font-weight: bold;
+  color: #0695c9;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  box-shadow: 0 2px 6px #c3cacd;
+  outline: none;
+  margin-bottom: 120px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+option {
+  background-color: #d2e7f9;
+}
+
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 20px;
-  padding: 30px;
+  padding: 20px;
   max-width: 100%;
-  margin-top: 80px;
+  margin-top: 50px;
   margin-left: auto;
   margin-right: auto;
   overflow-x: auto;
@@ -28,18 +57,29 @@ body {
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 5px;
+  padding: 10px;
   text-align: center;
   font-family: Arial, sans-serif;
   font-size: small;
   aspect-ratio: 1 / 1;
-  max-width: 140px; 
+  max-width: 140px;
+  height: 140px;
   width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.weather-box h3,
+.weather-box p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .weather-icon {
   width: 40px;
-  height: auto;
+  height: 40px;
   max-width: 100%;
   object-fit: contain;
   margin-bottom: 8px;

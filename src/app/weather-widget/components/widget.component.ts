@@ -4,36 +4,43 @@ import { WeatherService } from '../services/weather-service';
 import { map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { WeatherData } from '../models/weather-data.model';
-import { getWeatherIcon } from '../utils/weather-icon.util';
-
+import { getWeatherIcon, formatDate } from '../utils/weather-icon-date.utils';
+import { cities } from '../utils/city-options.util';
+import { CityOption } from '../models/city.model';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-widget',
   standalone: true,
   templateUrl: './widget.component.html',
   styleUrls: ['./widget.component.css'],
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
 })
-
 export class WidgetComponent implements OnInit {
   private weatherService = inject(WeatherService);
+
+  cities = cities;
+  selectedCity: CityOption = cities[0];
 
   days$: Observable<
     { date: string; max: number; min: number; code: number }[]
   > = of([]);
 
   ngOnInit() {
-    const lat = 52.37;
-    const lon = 4.89;
-
-    console.log("weather location coords:", lat , lon);
-
+    this.LoadWeather(this.selectedCity.lat, this.selectedCity.lon);
+    console.log(
+      'weather location coords:',
+      this.selectedCity.lat,
+      this.selectedCity.lon
+    );
+  }
+  LoadWeather(lat: number, lon: number) {
     this.days$ = this.weatherService.getWeather(lat, lon).pipe(
       map((data: WeatherData) =>
         data.daily.time.map((date, i) => ({
-          date,
+          date: formatDate(date),
           max: data.daily.temperature_2m_max[i],
           min: data.daily.temperature_2m_min[i],
-          code: data.daily.weathercode[i],          
+          code: data.daily.weathercode[i],
         }))
       )
     );

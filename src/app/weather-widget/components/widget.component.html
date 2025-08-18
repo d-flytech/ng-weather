@@ -1,12 +1,20 @@
+<h1>Weather Forecast</h1>
+
+<select [(ngModel)]="selectedCity" (ngModelChange)="LoadWeather($event.lat, $event.lon)">
+  @for (city of cities; track city.name) {
+  <option [ngValue]="city">{{city.name}}</option>
+  }
+</select>
+
 <div class="grid-container">
   @for (day of (days$ | async); track day.date) {
-    <div class="weather-box">
-      <h3>{{ day.date }}</h3>
-      <img [src]="getIconPath(day.code)" class = "weather-icon" alt = "weather icon"/>
-      <p>Max: {{ day.max }}°C</p>
-      <p>Min: {{ day.min }}°C</p>
-      <p>Code: {{ day.code }}</p>
-    </div>
+  <div class="weather-box">
+    <h3>{{ day.date }}</h3>
+    <img [src]="getIconPath(day.code)" class="weather-icon" alt="weather icon" />
+    <p>Max: {{ day.max }}°C</p>
+    <p>Min: {{ day.min }}°C</p>
+    <p>Code: {{ day.code }}</p>
+  </div>
   }
 </div>
 
