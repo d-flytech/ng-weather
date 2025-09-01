@@ -1,5 +1,5 @@
 export interface CityOption {
   name: string;
-  lat: number;
-  lon: number;
+  lat: number | null;
+  lon: number | null;
 }

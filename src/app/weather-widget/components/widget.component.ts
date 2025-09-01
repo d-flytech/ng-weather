@@ -33,18 +33,48 @@ export class WidgetComponent implements OnInit {
       this.selectedCity.lon
     );
   }
-  LoadWeather(lat: number, lon: number) {
-    this.days$ = this.weatherService.getWeather(lat, lon).pipe(
-      map((data: WeatherData) =>
-        data.daily.time.map((date, i) => ({
-          date: formatDate(date),
-          max: data.daily.temperature_2m_max[i],
-          min: data.daily.temperature_2m_min[i],
-          code: data.daily.weathercode[i],
-        }))
-      )
-    );
+
+  LoadWeather(lat: number | null, lon: number | null): void {
+    if (lat === null || lon === null) {
+      this.getUserLocation();
+    } else {
+      this.days$ = this.weatherService.getWeather(lat, lon).pipe(
+        map((data: WeatherData) =>
+          data.daily.time.map((date, i) => ({
+            date: formatDate(date),
+            max: Math.round(data.daily.temperature_2m_max[i]),
+            min: Math.round(data.daily.temperature_2m_min[i]),
+            code: data.daily.weathercode[i],
+          }))
+        )
+      );
+    }
   }
+
+  getUserLocation(): void {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          console.log('Geoleocation: ', { lat, lon });
+
+          this.LoadWeather(lat, lon);
+        },
+        (error) => {
+          console.warn('Geolocation failed, loading default city', error);
+          this.LoadWeather(52.37, 4.89);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    }
+  }
+
   getIconPath(code: number): string {
     const iconName = getWeatherIcon(code);
     return `icons/${iconName}.ico`;
