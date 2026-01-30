@@ -1,13 +1,14 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WeatherService } from '../services/weather-service';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { WeatherData } from '../models/weather-data.model';
 import { getWeatherIcon, formatDate } from '../utils/weather-icon-date.utils';
-import { cities } from '../utils/city-options.util';
+import { cities } from '../data/cities';
 import { CityOption } from '../models/city.model';
 import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-widget',
   standalone: true,
@@ -19,18 +20,22 @@ export class WidgetComponent implements OnInit {
   private weatherService = inject(WeatherService);
 
   cities = cities;
-  selectedCity: CityOption = cities[0];
+   // use of signal instead of observable 
+  selectedCity = signal<CityOption>(cities[0]);
 
-  days$: Observable<
+  // use of signal instead of observable 
+  days = signal<
     { date: string; max: number; min: number; code: number }[]
-  > = of([]);
+  >([]);
 
+  // reading signal
   ngOnInit() {
-    this.LoadWeather(this.selectedCity.lat, this.selectedCity.lon);
+    const city = this.selectedCity();
+    this.LoadWeather(city.lat, city.lon);
     console.log(
       'weather location coords:',
-      this.selectedCity.lat,
-      this.selectedCity.lon
+      city.lat,
+      city.lon
     );
   }
 
@@ -38,16 +43,22 @@ export class WidgetComponent implements OnInit {
     if (lat === null || lon === null) {
       this.getUserLocation();
     } else {
-      this.days$ = this.weatherService.getWeather(lat, lon).pipe(
+      this.weatherService.getWeather(lat, lon).pipe(
         map((data: WeatherData) =>
           data.daily.time.map((date, i) => ({
             date: formatDate(date),
             max: Math.round(data.daily.temperature_2m_max[i]),
             min: Math.round(data.daily.temperature_2m_min[i]),
-            code: data.daily.weathercode[i],
+            code: data.daily?.weather_code?.[i] ?? -1,
           }))
-        )
-      );
+        ),
+        catchError(err => {
+          console.error("Weather api failed", err);
+          return of ([]);
+        })
+      ).subscribe(weatherDays => {
+        this.days.set(weatherDays); //updated the signal
+      });
     }
   }
 
