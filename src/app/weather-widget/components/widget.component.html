@@ -1,6 +1,6 @@
 <h1>Weather Forecast</h1>
 
-<select [ngModel]="selectedCity()" (ngModelChange)="selectedCity.set($event); LoadWeather($event.lat, $event.lon)">
+<select [(ngModel)]="selectedCity">
   @for (city of cities; track city.name) {
   <option [ngValue]="city">{{city.name}}</option>
   }

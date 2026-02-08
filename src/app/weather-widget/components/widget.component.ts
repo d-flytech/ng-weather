@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { WeatherService } from '../services/weather-service';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { WeatherData } from '../models/weather-data.model';
 import { getWeatherIcon, formatDate } from '../utils/weather-icon-date.utils';
@@ -16,51 +17,45 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./widget.component.css'],
   imports: [CommonModule, FormsModule],
 })
-export class WidgetComponent implements OnInit {
+export class WidgetComponent {
   private weatherService = inject(WeatherService);
 
   cities = cities;
-   // use of signal instead of observable 
+  // use of signal instead of observable
   selectedCity = signal<CityOption>(cities[0]);
 
-  // use of signal instead of observable 
-  days = signal<
-    { date: string; max: number; min: number; code: number }[]
-  >([]);
-
-  // reading signal
-  ngOnInit() {
+  //signal-help
+  private coords = computed(() => {
     const city = this.selectedCity();
-    this.LoadWeather(city.lat, city.lon);
-    console.log(
-      'weather location coords:',
-      city.lat,
-      city.lon
-    );
-  }
+    return { lat: city.lat, lon: city.lon };
+  });
 
-  LoadWeather(lat: number | null, lon: number | null): void {
-    if (lat === null || lon === null) {
-      this.getUserLocation();
-    } else {
-      this.weatherService.getWeather(lat, lon).pipe(
-        map((data: WeatherData) =>
-          data.daily.time.map((date, i) => ({
-            date: formatDate(date),
-            max: Math.round(data.daily.temperature_2m_max[i]),
-            min: Math.round(data.daily.temperature_2m_min[i]),
-            code: data.daily?.weather_code?.[i] ?? -1,
-          }))
-        ),
-        catchError(err => {
-          console.error("Weather api failed", err);
-          return of ([]);
-        })
-      ).subscribe(weatherDays => {
-        this.days.set(weatherDays); //updated the signal
-      });
-    }
-  }
+  // use of toSignal -> toObservable
+  days = toSignal(
+    toObservable(this.coords).pipe(
+      switchMap(({ lat, lon }: { lat: number | null; lon: number | null }) => {
+        if (lat === null || lon === null) {
+          return of([]);
+        }
+
+        return this.weatherService.getWeather(lat, lon).pipe(
+          map((data: WeatherData) =>
+            data.daily.time.map((date, i) => ({
+              date: formatDate(date),
+              max: Math.round(data.daily.temperature_2m_max[i]),
+              min: Math.round(data.daily.temperature_2m_min[i]),
+              code: data.daily?.weather_code?.[i] ?? -1,
+            })),
+          ),
+          catchError((err) => {
+            console.error('Weather api failed', err);
+            return of([]);
+          }),
+        );
+      }),
+    ),
+    { initialValue: [] },
+  );
 
   getUserLocation(): void {
     if (navigator.geolocation) {
@@ -71,17 +66,22 @@ export class WidgetComponent implements OnInit {
 
           console.log('Geoleocation: ', { lat, lon });
 
-          this.LoadWeather(lat, lon);
+          const geoCity: CityOption = {
+            name: 'Your Location',
+            lat: lat,
+            lon: lon,
+          };
+          this.selectedCity.set(geoCity);
         },
         (error) => {
           console.warn('Geolocation failed, loading default city', error);
-          this.LoadWeather(52.37, 4.89);
+          this.selectedCity.set(cities[0]);
         },
         {
           enableHighAccuracy: true,
           timeout: 5000,
           maximumAge: 0,
-        }
+        },
       );
     }
   }
